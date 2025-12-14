@@ -1,0 +1,47 @@
+services:
+  # API Gateway (The Entry Point)
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8888:8080" # Exposed on 8888 to distinguish from Anarchy demo
+    environment:
+      - SERVER_PORT=8080
+    networks:
+      - governed-net
+
+  # Products Service (Hidden behind Gateway)
+  products-service:
+    build: ./products-service
+    environment:
+      - SERVER_PORT=8080
+    networks:
+      - governed-net
+
+  # Products Service Replica (For Load Balancing Demo)
+  products-service-2:
+    build: ./products-service
+    environment:
+      - SERVER_PORT=8080
+    networks:
+      - governed-net
+    # Note: In a real Docker Swarm/K8s, we wouldn't need a separate service name for replica, 
+    # but for pure Compose, it's easier to verify manually. 
+    # However, for the Gateway to LB between them via 'http://products-service', 
+    # we usually use 'deploy: replicas: 2' but that requires Swarm for VIP or some tricks.
+    # To keep it simple and working with the Gateway config 'uri: http://products-service:8080', 
+    # we will use Docker Compose aliases or just rely on 'products-service' scaling if we use --scale.
+
+  # Orders Service (Hidden, but talks to Gateway)
+  orders-service:
+    build: ./orders-service
+    environment:
+      - SERVER_PORT=8080
+      - APPLICATION_CONFIG_PRODUCTS_URL=http://api-gateway:8080
+    networks:
+      - governed-net
+    depends_on:
+      - api-gateway
+
+networks:
+  governed-net:
+    driver: bridge

@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: products_service_route_alt
+              uri: http://products-service:8080
+              predicates:
+                - Path=/api/products/**
+            - id: orders_service_route_alt
+              uri: http://orders-service:8080
+              predicates:
+                - Path=/api/orders/**
