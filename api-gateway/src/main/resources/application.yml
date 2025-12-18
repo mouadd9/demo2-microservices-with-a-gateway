@@ -4,16 +4,25 @@ server:
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
       server:
         webflux:
           routes:
             - id: products_service_route_alt
-              uri: http://products-service:8080
+              uri: lb://products-service:8080
               predicates:
                 - Path=/api/products/**
             - id: orders_service_route_alt
-              uri: http://orders-service:8080
+              uri: lb://orders-service:8080
               predicates:
                 - Path=/api/orders/**
+eureka:
+  client:
+    service-url:
+      # L'adresse du serveur Eureka définie dans ton docker-compose
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    # Optionnel mais conseillé : préférer l'utilisation de l'IP dans le registre
+    prefer-ip-address: true

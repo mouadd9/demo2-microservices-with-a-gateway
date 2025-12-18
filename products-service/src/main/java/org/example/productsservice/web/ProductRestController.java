@@ -21,6 +21,7 @@ public class ProductRestController {
 
     @GetMapping
     public List<ProductDTO> getAllProducts() {
+        System.out.println("=================Request Reached Controller=================");
         return productService.getAllProducts();
     }
 

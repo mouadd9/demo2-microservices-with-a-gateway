@@ -1,4 +1,12 @@
 services:
+
+  eureka-server:
+    build: ./eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - private-net
+
   # API Gateway (The Entry Point)
   api-gateway:
     build: ./api-gateway
@@ -6,12 +14,17 @@ services:
       - "8888:8080" # Exposed on 8888 
     networks:
       - private-net
+    depends_on:
+      - eureka-server
 
   # Products Service (Hidden behind Gateway)
   products-service:
     build: ./products-service
     networks:
       - private-net
+    depends_on:
+      - api-gateway
+      - eureka-server
 
   # Orders Service (Hidden, but talks to Gateway)
   orders-service:
@@ -22,6 +35,8 @@ services:
       - private-net
     depends_on:
       - api-gateway
+      - eureka-server
+      - products-service
 
 networks:
   private-net:
